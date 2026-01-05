@@ -159,6 +159,7 @@ else:
     st.markdown("---")
     st.markdown("### 🎬 Popular Movies to Try")
     popular_movies = df.nlargest(10, 'Popularity')[['Title', 'Release_Date', 'Genre', 'Popularity']]
-    st.dataframe(popular_movies, use_container_width=True, hide_index=True)
+    st.dataframe(popular_movies, width="stretch")
+
 
 
