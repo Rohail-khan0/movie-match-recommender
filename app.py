@@ -107,7 +107,7 @@ st.markdown("---")
 st.markdown("## 🔍 Search for Movie Recommendations")
 col_search, col_slider = st.columns([3, 1])
 with col_search:
-    movie_search = st.text_input("Enter a movie name:", placeholder="e.g., Avengers, The Batman, Spider-Man", key="movie_search")
+    movie_search = st.text_input("Enter a movie name:", placeholder="e.g., Avengers, Spider-Man", key="movie_search")
 with col_slider:
     num_recommendations = st.slider("Number of recommendations:", min_value=3, max_value=10, value=5, key="num_recs")
 
@@ -160,6 +160,7 @@ else:
     st.markdown("### 🎬 Popular Movies to Try")
     popular_movies = df.nlargest(10, 'Popularity')[['Title', 'Release_Date', 'Genre', 'Popularity']]
     st.dataframe(popular_movies, width="stretch", hide_index=True)
+
 
 
 
