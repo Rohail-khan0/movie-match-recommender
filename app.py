@@ -69,7 +69,6 @@ def load_and_preprocess_data():
     
     return df
 
-
 @st.cache_data
 def build_similarity_matrix(df):
     """Build TF-IDF and cosine similarity matrix"""
@@ -92,14 +91,13 @@ def recommend_movies(df, cosine_sim, movie_name, num_recommendations=5):
     similarity_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
     
     top_movies = similarity_scores[1:num_recommendations+1]
-    recommended_indices = [i[0] for i in top_movies]z
+    recommended_indices = [i[0] for i in top_movies]
     
     return df.iloc[recommended_indices], None
 
 # Load data
 df = load_and_preprocess_data()
 cosine_sim = build_similarity_matrix(df)
-
 
 # Main UI Header
 st.markdown('<h1 class="main-header">🎬 Movie Recommendation System</h1>', unsafe_allow_html=True)
@@ -109,7 +107,7 @@ st.markdown("---")
 st.markdown("## 🔍 Search for Movie Recommendations")
 col_search, col_slider = st.columns([3, 1])
 with col_search:
-    movie_search = st.text_input("Enter a movie name:", placeholder="e.g., Avengers, Spider-Man", key="movie_search")
+    movie_search = st.text_input("Enter a movie name:", placeholder="e.g., Avengers, The Batman, Spider-Man", key="movie_search")
 with col_slider:
     num_recommendations = st.slider("Number of recommendations:", min_value=3, max_value=10, value=5, key="num_recs")
 
@@ -162,10 +160,5 @@ else:
     st.markdown("### 🎬 Popular Movies to Try")
     popular_movies = df.nlargest(10, 'Popularity')[['Title', 'Release_Date', 'Genre', 'Popularity']]
     st.dataframe(popular_movies, use_container_width=True, hide_index=True)
-
-
-
-
-
 
 
