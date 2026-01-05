@@ -39,35 +39,54 @@ st.markdown("""
 
 @st.cache_data
 def load_and_preprocess_data():
-    """Load and preprocess the movie data"""
-    df = pd.read_csv("movies.csv", lineterminator="\n")
-    
-    # Preprocessing
-    df["Release_Date"] = pd.to_datetime(df["Release_Date"]).dt.year
+    try:
+        df = pd.read_csv("movies.csv")
+    except Exception as e:
+        st.error("❌ movies.csv file not found or cannot be read.")
+        st.stop()
+
+    required_columns = [
+        "Title", "Overview", "Genre", "Release_Date",
+        "Popularity", "Vote_Average", "Vote_Count", "Poster_Url"
+    ]
+
+    missing_cols = [c for c in required_columns if c not in df.columns]
+    if missing_cols:
+        st.error(f"❌ Missing columns in movies.csv: {missing_cols}")
+        st.stop()
+
+    df["Release_Date"] = pd.to_datetime(
+        df["Release_Date"], errors="coerce"
+    ).dt.year
+
     df = df.drop(["Poster_Url", "Vote_Count"], axis=1)
-    
-    # Categorize movies
-    stats = df['Vote_Average'].describe()
-    q1, q2, q3 = stats['25%'], stats['50%'], stats['75%']
-    
-    def categorize_vote(vote):
-        if vote >= q3:
-            return 'Popular'
-        elif vote >= q2:
-            return 'Average'
-        elif vote >= q1:
-            return 'Below Average'
+
+    stats = df["Vote_Average"].describe()
+    q1, q2, q3 = stats["25%"], stats["50%"], stats["75%"]
+
+    def categorize_vote(v):
+        if v >= q3:
+            return "Popular"
+        elif v >= q2:
+            return "Average"
+        elif v >= q1:
+            return "Below Average"
         else:
-            return 'Not Popular'
-    
-    df['Category'] = df['Vote_Average'].apply(categorize_vote)
+            return "Not Popular"
+
+    df["Category"] = df["Vote_Average"].apply(categorize_vote)
     df = df.drop(["Vote_Average"], axis=1)
-    
-    # Create combined features for recommendation
-    df['combined_features'] = df['Overview'] + " " + df['Genre']
-    df['title_clean'] = df['Title'].astype(str).str.lower().str.strip()
-    
+
+    df["combined_features"] = (
+        df["Overview"].fillna("") + " " + df["Genre"].fillna("")
+    )
+
+    df["title_clean"] = (
+        df["Title"].astype(str).str.lower().str.strip()
+    )
+
     return df
+
 
 @st.cache_data
 def build_similarity_matrix(df):
@@ -97,7 +116,9 @@ def recommend_movies(df, cosine_sim, movie_name, num_recommendations=5):
 
 # Load data
 df = load_and_preprocess_data()
-cosine_sim = build_similarity_matrix(df)
+with st.spinner("🔄 Building recommendation engine..."):
+    cosine_sim = build_similarity_matrix(df)
+
 
 # Main UI Header
 st.markdown('<h1 class="main-header">🎬 Movie Recommendation System</h1>', unsafe_allow_html=True)
@@ -160,6 +181,7 @@ else:
     st.markdown("### 🎬 Popular Movies to Try")
     popular_movies = df.nlargest(10, 'Popularity')[['Title', 'Release_Date', 'Genre', 'Popularity']]
     st.dataframe(popular_movies, width="stretch", hide_index=True)
+
 
 
 
